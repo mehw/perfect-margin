@@ -329,7 +329,8 @@ WIN will be any visible window, including the minimap window."
     (remove-hook 'window-configuration-change-hook 'perfect-margin-margin-windows)
     (remove-hook 'window-size-change-functions 'perfect-margin-margin-frame)
     (dolist (window (window-list))
-      (set-window-margins window 0 0))))
+      (set-window-margins window 0 0)
+      (set-window-fringes window nil))))
 
 (provide 'perfect-margin)
 
