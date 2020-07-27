@@ -248,14 +248,14 @@ WIN will be any visible window, including the minimap window."
 (defun perfect-margin-margin-windows ()
   "Main logic to setup window's margin, keep the visible main window always at center."
   (dolist (win (window-list))
+    (set-window-fringes win 0 0)
     (cond
      ((perfect-margin-with-minimap-p) (perfect-margin-minimap-margin-window win))
      ((and (not (perfect-margin--auto-margin-ignore-p win))
            (<= (frame-width) (perfect-margin--width-with-margins win)))
       (let ((init-window-margins (perfect-margin--init-window-margins)))
         (set-window-margins win (car init-window-margins) (cdr init-window-margins))))
-     (t (set-window-margins win (if (perfect-margin-with-linum-p) 3 0) 0)))
-    (set-window-fringes win 0 0)))
+     (t (set-window-margins win (if (perfect-margin-with-linum-p) 3 0) 0)))))
 
 (defun perfect-margin-margin-frame (&optional _)
   "Hook to resize window when frame size change."
