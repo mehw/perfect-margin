@@ -251,7 +251,6 @@ WIN will be any visible window, including the minimap window."
 (defun perfect-margin-margin-windows ()
   "Main logic to setup window's margin, keep the visible main window always at center."
   (dolist (win (window-list))
-    (set-window-fringes win 0 0)
     (cond
      ((perfect-margin-with-minimap-p) (perfect-margin-minimap-margin-window win))
      ((and (not (perfect-margin--auto-margin-ignore-p win))
@@ -286,17 +285,9 @@ WIN will be any visible window, including the minimap window."
   "Restore windonw's original left margin, as `linum-update-window' always reset left margin."
   (set-window-margins win perfect-margin--linum-update-win-left-margin (cdr (window-margins win))))
 
-(defadvice minimap-update (after minimap-update-no-fringe nil)
-  "Prevent fringe overlay of target buffer from drawing on `minimap-window'."
-  (when (and  (minimap-get-window)
-              (window-live-p (minimap-get-window))
-              minimap-hide-fringes)
-    (set-window-fringes (minimap-get-window) 0 0)))
-
 (defadvice split-window (before perfect-margin--disable-margins nil)
   (dolist (win (window-list))
-    (set-window-margins win 0 0)
-    (set-window-fringes win 0 0)))
+    (set-window-margins win 0 0)))
 
 ;;----------------------------------------------------------------------------
 ;; MINOR mode definition
@@ -314,8 +305,6 @@ WIN will be any visible window, including the minimap window."
           (ad-activate 'linum-update-window)
           (when (eq linum-format 'dynamic)
             (setq linum-format 'perfect-margin--linum-format)))
-        (when (perfect-margin-with-minimap-p)
-          (ad-activate 'minimap-update))
         (ad-activate 'split-window)
         (add-hook 'window-configuration-change-hook 'perfect-margin-margin-windows)
         (add-hook 'window-size-change-functions 'perfect-margin-margin-frame)
@@ -326,14 +315,11 @@ WIN will be any visible window, including the minimap window."
       (when (eq linum-format 'perfect-margin--linum-format)
         (setq linum-format 'dynamic))
       (linum-update-current))
-    (when (perfect-margin-with-minimap-p)
-      (ad-deactivate 'minimap-update))
     (ad-deactivate 'split-window)
     (remove-hook 'window-configuration-change-hook 'perfect-margin-margin-windows)
     (remove-hook 'window-size-change-functions 'perfect-margin-margin-frame)
     (dolist (window (window-list))
-      (set-window-margins window 0 0)
-      (set-window-fringes window nil))))
+      (set-window-margins window 0 0))))
 
 (provide 'perfect-margin)
 
