@@ -121,11 +121,14 @@ Each function is called with window as its sole arguemnt, returning a non-nil va
 ;; Private functions
 ;;----------------------------------------------------------------------------
 (defun perfect-margin--width-with-margins (win)
-  "Calculate size of window(WIN) with it's margins."
-  (let ((margins (window-margins win)))
-    (+ (window-width win)
-       (or (car margins) 0)
-       (or (cdr margins) 0))))
+  "Calculate size of window(WIN) with it's margins and fringes."
+  (with-selected-window win
+    (let ((margins (window-margins)))
+      (+ (window-width)
+         (or (car margins) 0)
+         (or (cdr margins) 0)
+         (fringe-columns 'left)
+         (fringe-columns 'right)))))
 
 (defun perfect-margin--minimap-window-p (win)
   "Judge if the window(WIN) is the minimap window itself, when it's live."
