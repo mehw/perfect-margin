@@ -181,7 +181,7 @@ WIN will be any visible window, including the minimap window."
       (cond
        ((= (frame-width) (perfect-margin--width-with-margins win))
         (set-window-margins win (car init-window-margins) (cdr init-window-margins)))
-       ;; When the window is first splited and minimap-window is not set,
+       ;; When the window is first splitted and minimap-window is not set,
        ;; the minimap has the same buffer name with it's target window.
        ;; Distinguish the minimap and target window base on edge and size.
        ;;
@@ -210,7 +210,7 @@ WIN will be any visible window, including the minimap window."
        ((and (= (nth 0 win-edges) 0)
              (= (nth 2 win-edges) (round (* perfect-margin-visible-width minimap-width-fraction)))))
        ((and (= (nth 0 win-edges) (round (* perfect-margin-visible-width minimap-width-fraction)))
-             ;; the splited target window carries original margins
+             ;; the splitted target window carries original margins
              (= (or (car (window-margins win)) 0) (car init-window-margins))
              (= (or (cdr (window-margins win)) 0) (cdr init-window-margins)))
         (set-window-margins win
