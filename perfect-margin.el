@@ -130,6 +130,17 @@ Each function is called with window as its sole arguemnt, returning a non-nil va
          (fringe-columns 'left)
          (fringe-columns 'right)))))
 
+(defun perfect-margin--switch-window-p (win)
+  "Return WIN if it is a switch window, otherwise retrun nil.
+
+A switch window is controlled by `switch-window'. A temp buffer
+is shown in WIN to allow the user to change window via a label."
+  (with-current-buffer (window-buffer win)
+    (catch 'switch-window
+      (dolist (ov (overlays-at (point-min)))
+        (when (eq (overlay-get ov 'switch-window-buffer) t)
+          (throw 'switch-window win))))))
+
 (defun perfect-margin--minimap-window-p (win)
   "Return WIN if it is the minimap window, otherwise retrun nil.
 
@@ -172,6 +183,7 @@ Return nil if WIN's text can't be at the frame's center."
     (dolist (win (window-list))
       (when (window-live-p win)
         (cond
+         ((perfect-margin--switch-window-p win))
          ((perfect-margin--minimap-window-p win))
          ((and (not (perfect-margin--auto-margin-ignore-p win))
                (setq init-window-margins (perfect-margin--init-window-margins win)))
@@ -205,6 +217,12 @@ Return nil if WIN's text can't be at the frame's center."
   "Restore windonw's original left margin, as `linum-update-window' always reset left margin."
   (set-window-margins win perfect-margin--linum-update-win-left-margin (cdr (window-margins win))))
 
+(defadvice switch-window--create-label-buffer (after perfect-margin-switch-window-create-label-before (&optional window buffer label background))
+  "Mark a `switch-window' buffer with an overlay."
+  (when buffer
+    (let ((ov (make-overlay 1 2 buffer)))
+      (overlay-put ov 'switch-window-buffer t))))
+
 (defadvice split-window (before perfect-margin--disable-margins nil)
   (dolist (win (window-list))
     (set-window-margins win 0 0)))
@@ -225,6 +243,7 @@ Return nil if WIN's text can't be at the frame's center."
           (ad-activate 'linum-update-window)
           (when (eq linum-format 'dynamic)
             (setq linum-format 'perfect-margin--linum-format)))
+        (ad-activate 'switch-window--create-label-buffer)
         (ad-activate 'split-window)
         (add-hook 'window-configuration-change-hook 'perfect-margin-margin-windows)
         (add-hook 'window-size-change-functions 'perfect-margin-margin-frame)
@@ -235,6 +254,7 @@ Return nil if WIN's text can't be at the frame's center."
       (when (eq linum-format 'perfect-margin--linum-format)
         (setq linum-format 'dynamic))
       (linum-update-current))
+    (ad-deactivate 'switch-window--create-label-buffer)
     (ad-deactivate 'split-window)
     (remove-hook 'window-configuration-change-hook 'perfect-margin-margin-windows)
     (remove-hook 'window-size-change-functions 'perfect-margin-margin-frame)
